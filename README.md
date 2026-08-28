@@ -102,7 +102,7 @@ describes a source. It does not fetch one.
 
 ## 6. Store and build model
 
-The store lives at `/kura/store`. Paths are input-addressed: the hash of the canonical IR for a build, including all inputs. Content-addressed outputs come later.
+The store lives at `/kura/store`. Ordinary build outputs are input-addressed by the canonical derivation IR, including all inputs. Fixed-output sources and imported foreign packages use a separate content-and-materialization-policy identity, so changing a mirror or provenance record does not change the store path. Content-addressed ordinary build outputs come later.
 
 ```
 /kura/store/<hash>-hyprland-0.52.0
@@ -133,7 +133,7 @@ This evaluates to a closure containing kernel, initrd, bootloader entries, `/etc
 
 ## 8. FHS compatibility
 
-Each generation contains a real FHS tree—`/usr/bin`, `/usr/lib`, `/usr/share`, `/etc`—as a store object: a directory of symlinks into the store, built like any other output. On the running system, `/usr` and `/etc` are symlinks to the current generation's tree. Switching generations swaps two symlinks.
+Each generation contains a real FHS tree—`/usr/bin`, `/usr/lib`, `/usr/share`, `/etc`—as a store object: a directory of symlinks into the store, built like any other output. On the running system, `/usr` and `/etc` resolve through one current-generation selector. Switching generations changes that selector coherently rather than updating two independent links.
 
 Kura-built packages link to store paths directly via `RUNPATH`. Foreign binaries—NVIDIA, Steam, JetBrains, Electron apps, anything with `/usr/lib` hardcoded—find what they expect where they expect it, with an unmodified dynamic linker and no patching. Two packages that provide the same path conflict at composition time, in Rust, not during install on the user's machine.
 
